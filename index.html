@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KYOTO EXPERIMENT 2026 — Scribble Generator</title>
+<title>KYOTO EXPERIMENT Logo Machine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@ button{
   background:#ffffff;
   border:2px solid #000;
 }
-#preview{touch-action:none;
+#preview{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;
   display:block;
   max-width:100%;
 }
@@ -82,9 +82,24 @@ button{
   font-size:12px;
   color:#555;
 }
+
+#site-title{
+  margin:0;
+  padding:14px 12px 10px;
+  font-family:"Comic Sans MS","Comic Relief","Comic Sans",cursive;
+  font-size:clamp(24px,4vw,46px);
+  font-weight:700;
+  line-height:1.05;
+  background:#fff;
+  color:#000;
+  border-bottom:2px solid #000;
+}
+
 </style>
 </head>
 <body>
+<h1 id="site-title">KYOTO EXPERIMENT Logo Machine</h1>
+
 
 <div id="controls">
   <div id="options">
@@ -1127,101 +1142,179 @@ renderPreviewAt(0);
 
 
 // Mouse / touch / pen photo manipulation on the preview.
-// One pointer: drag. Two pointers: pinch to zoom.
+// One pointer = move photo.
+// Two pointers = pinch to zoom.
+// The existing Photo Scale / Photo X / Photo Y controls are the source of truth.
 const previewGesture = {
   pointers:new Map(),
   lastCenter:null,
-  lastDistance:null,
-  startScale:null
+  lastDistance:null
 };
 
 function previewPoint(e){
   const r=els.preview.getBoundingClientRect();
   return {
-    x:(e.clientX-r.left),
-    y:(e.clientY-r.top)
+    x:e.clientX-r.left,
+    y:e.clientY-r.top
   };
 }
 
-function syncPhotoControls(){
-  if(els.scale) els.scale.value=Math.round(photoScale*100);
-  if(els.x) els.x.value=Math.round(photoX);
-  if(els.y) els.y.value=Math.round(photoY);
+function getPhotoScaleValue(){
+  return Math.max(1,Math.min(3,Number(els.photoScale.value)||1));
 }
 
-function rerenderGesture(){
-  renderPreviewAt(Number(els.scrubber.value)||0);
-  syncPhotoControls();
+function setPhotoScaleValue(v){
+  const next=Math.max(1,Math.min(3,v));
+  els.photoScale.value=next.toFixed(2);
+  els.photoScaleLabel.textContent=`${Math.round(next*100)}%`;
+}
+
+function addPhotoOffset(dxCss,dyCss){
+  const rect=els.preview.getBoundingClientRect();
+  if(!rect.width || !rect.height)return;
+
+  const dxOutput=dxCss*(W/rect.width);
+  const dyOutput=dyCss*(H/rect.height);
+
+  els.photoX.value=(Number(els.photoX.value)||0)+dxOutput;
+  els.photoY.value=(Number(els.photoY.value)||0)+dyOutput;
+}
+
+function rerenderFromGesture(){
+  if(mediaType){
+    renderPreviewAt(Number(els.scrubber.value)||0);
+  }
 }
 
 els.preview.addEventListener("pointerdown",e=>{
   if(!mediaType)return;
+
   e.preventDefault();
-  try{els.preview.setPointerCapture(e.pointerId)}catch(_){}
+
+  try{
+    els.preview.setPointerCapture(e.pointerId);
+  }catch(_){}
+
   previewGesture.pointers.set(e.pointerId,previewPoint(e));
 
   const pts=[...previewGesture.pointers.values()];
+
   if(pts.length===1){
     previewGesture.lastCenter=pts[0];
     previewGesture.lastDistance=null;
   }else if(pts.length>=2){
-    const a=pts[0], b=pts[1];
-    previewGesture.lastCenter={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
-    previewGesture.lastDistance=Math.hypot(b.x-a.x,b.y-a.y);
+    const a=pts[0];
+    const b=pts[1];
+
+    previewGesture.lastCenter={
+      x:(a.x+b.x)/2,
+      y:(a.y+b.y)/2
+    };
+
+    previewGesture.lastDistance=Math.max(
+      1,
+      Math.hypot(b.x-a.x,b.y-a.y)
+    );
   }
 },{passive:false});
 
 els.preview.addEventListener("pointermove",e=>{
   if(!previewGesture.pointers.has(e.pointerId))return;
+
   e.preventDefault();
   previewGesture.pointers.set(e.pointerId,previewPoint(e));
 
   const pts=[...previewGesture.pointers.values()];
+
   if(pts.length===1){
     const p=pts[0];
-    const last=previewGesture.lastCenter;
-    if(last){
-      // Convert CSS-pixel drag into output-image coordinates.
-      const rect=els.preview.getBoundingClientRect();
-      const sx=W/rect.width, sy=H/rect.height;
-      photoX+=(p.x-last.x)*sx;
-      photoY+=(p.y-last.y)*sy;
-      rerenderGesture();
+
+    if(previewGesture.lastCenter){
+      addPhotoOffset(
+        p.x-previewGesture.lastCenter.x,
+        p.y-previewGesture.lastCenter.y
+      );
+      rerenderFromGesture();
     }
+
     previewGesture.lastCenter=p;
     previewGesture.lastDistance=null;
-  }else if(pts.length>=2){
-    const a=pts[0], b=pts[1];
-    const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
-    const dist=Math.max(1,Math.hypot(b.x-a.x,b.y-a.y));
+    return;
+  }
 
-    if(previewGesture.lastCenter && previewGesture.lastDistance){
-      const rect=els.preview.getBoundingClientRect();
-      const sx=W/rect.width, sy=H/rect.height;
+  if(pts.length>=2){
+    const a=pts[0];
+    const b=pts[1];
 
-      // Pan with the midpoint.
-      photoX+=(center.x-previewGesture.lastCenter.x)*sx;
-      photoY+=(center.y-previewGesture.lastCenter.y)*sy;
+    const center={
+      x:(a.x+b.x)/2,
+      y:(a.y+b.y)/2
+    };
 
-      // Pinch zoom around current placement.
-      const ratio=dist/previewGesture.lastDistance;
-      photoScale=Math.max(0.1,Math.min(5,photoScale*ratio));
-      rerenderGesture();
+    const distance=Math.max(
+      1,
+      Math.hypot(b.x-a.x,b.y-a.y)
+    );
+
+    if(previewGesture.lastCenter){
+      addPhotoOffset(
+        center.x-previewGesture.lastCenter.x,
+        center.y-previewGesture.lastCenter.y
+      );
+    }
+
+    if(previewGesture.lastDistance){
+      const ratio=distance/previewGesture.lastDistance;
+      setPhotoScaleValue(getPhotoScaleValue()*ratio);
     }
 
     previewGesture.lastCenter=center;
-    previewGesture.lastDistance=dist;
+    previewGesture.lastDistance=distance;
+
+    rerenderFromGesture();
   }
 },{passive:false});
 
-function endPreviewPointer(e){
+function finishPreviewPointer(e){
   previewGesture.pointers.delete(e.pointerId);
+
   const pts=[...previewGesture.pointers.values()];
-  previewGesture.lastDistance=null;
-  previewGesture.lastCenter=pts.length ? pts[0] : null;
+
+  if(pts.length===0){
+    previewGesture.lastCenter=null;
+    previewGesture.lastDistance=null;
+  }else if(pts.length===1){
+    previewGesture.lastCenter=pts[0];
+    previewGesture.lastDistance=null;
+  }else{
+    const a=pts[0];
+    const b=pts[1];
+
+    previewGesture.lastCenter={
+      x:(a.x+b.x)/2,
+      y:(a.y+b.y)/2
+    };
+
+    previewGesture.lastDistance=Math.max(
+      1,
+      Math.hypot(b.x-a.x,b.y-a.y)
+    );
+  }
 }
-els.preview.addEventListener("pointerup",endPreviewPointer,{passive:false});
-els.preview.addEventListener("pointercancel",endPreviewPointer,{passive:false});
+
+els.preview.addEventListener("pointerup",finishPreviewPointer,{passive:false});
+els.preview.addEventListener("pointercancel",finishPreviewPointer,{passive:false});
+
+// PC convenience: mouse wheel zooms the photo while pointer remains over preview.
+els.preview.addEventListener("wheel",e=>{
+  if(!mediaType)return;
+
+  e.preventDefault();
+
+  const factor=e.deltaY<0 ? 1.05 : 0.95;
+  setPhotoScaleValue(getPhotoScaleValue()*factor);
+  rerenderFromGesture();
+},{passive:false});
 
 </script>
 </body>
