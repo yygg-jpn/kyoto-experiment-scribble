@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KYOTO EXPERIMENT 2026 — Scribble Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap" rel="stylesheet">
+
 <meta name="description" content="Create a KYOTO EXPERIMENT 2026 animated scribble logo over your photo or video.">
 <style>
 :root{
@@ -16,7 +20,7 @@ body{
   margin:0;
   background:#ffffff;
   color:var(--text);
-  font-family:'Comic Sans MS','Comic Sans',Arial,sans-serif;
+  font-family:'Comic Sans MS','Comic Relief','Comic Sans',Arial,sans-serif;
 }
 button,input{font:inherit}
 #controls{
@@ -238,6 +242,18 @@ function drawEasterEgg(targetCtx){
   targetCtx.restore();
 }
 
+async function ensureLogoFontReady(){
+  if(!document.fonts || !document.fonts.load) return;
+  try{
+    // If Comic Sans MS exists locally it wins automatically.
+    // Otherwise this makes sure Comic Relief is ready before rendering/export.
+    await Promise.race([
+      document.fonts.load('48px "Comic Relief"'),
+      new Promise(resolve=>setTimeout(resolve,3000))
+    ]);
+  }catch(_){}
+}
+
 function rand(a,b){return Math.random()*(b-a)+a}
 
 
@@ -401,7 +417,7 @@ function makeRandomScribble(){
   const safeMargin=Math.max(18,Math.min(W,H)*.035);
 
   function getTextBounds(fontSize,angle){
-    measureCtx.font=`${fontSize}px "Comic Sans MS","Comic Sans",cursive`;
+    measureCtx.font=`${fontSize}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
     const m=measureCtx.measureText(TEXT);
 
     const textW=m.width;
@@ -520,7 +536,7 @@ function renderFrame(time,targetCtx){
     targetCtx.rotate(textSpec.rotation);
     targetCtx.fillStyle="#ffffff";
     targetCtx.globalAlpha=1;
-    targetCtx.font=`${textSpec.size}px "Comic Sans MS","Comic Sans",cursive`;
+    targetCtx.font=`${textSpec.size}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
     targetCtx.textAlign="center";
     targetCtx.textBaseline="middle";
     targetCtx.fillText(TEXT.slice(0,count),0,0);
@@ -593,11 +609,13 @@ function resetAndRandomize(){
   },60);
 }
 
-function play(){
+async function play(){
   if(!mediaType){
     alert("Upload a photo or video first.");
     return;
   }
+
+  await ensureLogoFontReady();
 
   if(playing){
     playing=false;
@@ -826,6 +844,8 @@ async function seekVideoForExport(time){
 }
 
 async function exportMP4(){
+  await ensureLogoFontReady();
+
   if(!mediaType){
     alert("Upload a photo or video first.");
     return;
@@ -1023,6 +1043,8 @@ async function exportMP4(){
 }
 
 async function exportFinalPNG(){
+  await ensureLogoFontReady();
+
   if(!mediaType){
     alert("Upload a photo or video first.");
     return;
