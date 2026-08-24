@@ -95,16 +95,70 @@ button{
   border-bottom:2px solid #000;
 }
 
+
+#lineNotice{
+  display:none;
+  margin:10px 12px;
+  padding:10px 12px;
+  border:1px solid #000;
+  background:#fff7d6;
+  font-size:14px;
+  line-height:1.5;
+}
+#lineNotice strong{display:block;margin-bottom:4px}
+
+
+
+
+
+.upload-label-text{
+  display:block;
+  margin-bottom:6px;
+}
+.upload-limit-note{
+  display:block;
+  margin-top:5px;
+  font-size:0.78em;
+  opacity:0.72;
+}
+
+@media (max-width:700px){
+  #options label:first-child{
+    display:block;
+    width:100%;
+  }
+  #options label:first-child input[type="file"]{
+    display:block;
+    width:100%;
+    max-width:100%;
+    font-size:16px;
+  }
+}
+
+
+@media (max-width:700px){
+  #site-title{
+    font-weight:400;
+  }
+}
+
 </style>
 </head>
 <body>
 <h1 id="site-title">KYOTO EXPERIMENT Logo Machine</h1>
 
+<div id="lineNotice">
+  <strong>LINE内ブラウザで開いています</strong>
+  画像・動画の保存が制限される場合があります。Downloadボタンでは、対応端末なら共有／保存シートを開きます。
+  うまく保存できない場合は、LINE右上メニューからChrome / Safariで開いてください。
+</div>
+
+
 
 <div id="controls">
   <div id="options">
-    <label>Upload Photo / Video:
-      <input type="file" id="photoInput" accept="image/*,video/*">
+    <label><span class="upload-label-text">Upload Photo / Video</span>
+      <input type="file" id="photoInput" accept="image/*,video/*"><span class="upload-limit-note">Photo / Video · Video up to 15 sec</span>
     </label>
 
     <label>Output Size:
@@ -257,13 +311,27 @@ function drawEasterEgg(targetCtx){
   targetCtx.restore();
 }
 
+
+async function getLogoFontSpec(size){
+  if(document.fonts){
+    try{
+      // Use genuine Comic Sans MS Bold when the device has it locally.
+      if(document.fonts.check(`700 ${size}px "Comic Sans MS"`)){
+        return `700 ${size}px "Comic Sans MS"`;
+      }
+    }catch(_){}
+  }
+  // Mobile / devices without Comic Sans: Comic Relief Regular.
+  return `400 ${size}px "Comic Relief","Comic Sans",cursive`;
+}
+
 async function ensureLogoFontReady(){
   if(!document.fonts || !document.fonts.load) return;
   try{
     // If Comic Sans MS exists locally it wins automatically.
     // Otherwise this makes sure Comic Relief is ready before rendering/export.
     await Promise.race([
-      document.fonts.load('700 48px "Comic Relief"'),
+      document.fonts.load('400 48px "Comic Relief"'),
       new Promise(resolve=>setTimeout(resolve,3000))
     ]);
   }catch(_){}
@@ -858,6 +926,60 @@ async function seekVideoForExport(time){
   });
 }
 
+
+const isLineBrowser = /Line\//i.test(navigator.userAgent) || /\bLine\b/i.test(navigator.userAgent);
+
+function initLineBrowserNotice(){
+  const n=document.getElementById("lineNotice");
+  if(n && isLineBrowser) n.style.display="block";
+}
+initLineBrowserNotice();
+
+async function saveOrShareBlob(blob, filename, mime){
+  const file = new File([blob], filename, {type:mime || blob.type || "application/octet-stream"});
+
+  // LINE/in-app/mobile browsers often handle native share sheets more reliably
+  // than the HTML download attribute.
+  if(navigator.canShare && navigator.share){
+    try{
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({
+          files:[file],
+          title:filename
+        });
+        return true;
+      }
+    }catch(err){
+      // User cancel is harmless; fall through only for actual unsupported behavior.
+      if(err && err.name==="AbortError") return true;
+    }
+  }
+
+  // Normal browser download fallback.
+  try{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=filename;
+    a.rel="noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    return true;
+  }catch(_){}
+
+  // Last resort: open the generated media itself.
+  try{
+    const url=URL.createObjectURL(blob);
+    window.open(url,"_blank","noopener");
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    return true;
+  }catch(_){}
+
+  return false;
+}
+
 async function exportMP4(){
   await ensureLogoFontReady();
 
@@ -1033,16 +1155,14 @@ async function exportMP4(){
       throw new Error("Encoded MP4 data is unexpectedly small.");
     }
 
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download=`photo-scribble-${outW}x${outH}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const filename=`photo-scribble-${outW}x${outH}.mp4`;
+    const saved=await saveOrShareBlob(blob,filename,"video/mp4");
 
-    setTimeout(()=>URL.revokeObjectURL(url),3000);
-    els.status.textContent=`MP4 exported: ${outW}×${outH}`;
+    if(!saved && isLineBrowser){
+      alert("LINE内ブラウザでは保存できませんでした。LINEのメニューからChrome / Safariで開いてください。");
+    }
+
+    els.status.textContent=`MP4 ready: ${outW}×${outH}`;
 
   }catch(err){
     console.error(err);
@@ -1081,12 +1201,15 @@ async function exportFinalPNG(){
   renderFrame(finalTime,c);
 
   const blob=await new Promise(r=>off.toBlob(r,"image/png"));
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="photo-scribble-final.png";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  const saved=await saveOrShareBlob(
+    blob,
+    "photo-scribble-final.png",
+    "image/png"
+  );
+
+  if(!saved && isLineBrowser){
+    alert("LINE内ブラウザでは保存できませんでした。LINEのメニューからChrome / Safariで開いてください。");
+  }
 }
 
 els.photoInput.addEventListener("change",()=>loadMedia(els.photoInput.files[0]));
