@@ -58,7 +58,7 @@ button{
   background:#ffffff;
   border:2px solid #000;
 }
-#preview{
+#preview{touch-action:none;
   display:block;
   max-width:100%;
 }
@@ -248,7 +248,7 @@ async function ensureLogoFontReady(){
     // If Comic Sans MS exists locally it wins automatically.
     // Otherwise this makes sure Comic Relief is ready before rendering/export.
     await Promise.race([
-      document.fonts.load('48px "Comic Relief"'),
+      document.fonts.load('700 48px "Comic Relief"'),
       new Promise(resolve=>setTimeout(resolve,3000))
     ]);
   }catch(_){}
@@ -417,7 +417,7 @@ function makeRandomScribble(){
   const safeMargin=Math.max(18,Math.min(W,H)*.035);
 
   function getTextBounds(fontSize,angle){
-    measureCtx.font=`${fontSize}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
+    measureCtx.font=`700 ${fontSize}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
     const m=measureCtx.measureText(TEXT);
 
     const textW=m.width;
@@ -536,7 +536,7 @@ function renderFrame(time,targetCtx){
     targetCtx.rotate(textSpec.rotation);
     targetCtx.fillStyle="#ffffff";
     targetCtx.globalAlpha=1;
-    targetCtx.font=`${textSpec.size}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
+    targetCtx.font=`700 ${textSpec.size}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
     targetCtx.textAlign="center";
     targetCtx.textBaseline="middle";
     targetCtx.fillText(TEXT.slice(0,count),0,0);
@@ -1124,6 +1124,105 @@ window.addEventListener("resize",fitPreview);
 
 fitPreview();
 renderPreviewAt(0);
+
+
+// Mouse / touch / pen photo manipulation on the preview.
+// One pointer: drag. Two pointers: pinch to zoom.
+const previewGesture = {
+  pointers:new Map(),
+  lastCenter:null,
+  lastDistance:null,
+  startScale:null
+};
+
+function previewPoint(e){
+  const r=els.preview.getBoundingClientRect();
+  return {
+    x:(e.clientX-r.left),
+    y:(e.clientY-r.top)
+  };
+}
+
+function syncPhotoControls(){
+  if(els.scale) els.scale.value=Math.round(photoScale*100);
+  if(els.x) els.x.value=Math.round(photoX);
+  if(els.y) els.y.value=Math.round(photoY);
+}
+
+function rerenderGesture(){
+  renderPreviewAt(Number(els.scrubber.value)||0);
+  syncPhotoControls();
+}
+
+els.preview.addEventListener("pointerdown",e=>{
+  if(!mediaType)return;
+  e.preventDefault();
+  try{els.preview.setPointerCapture(e.pointerId)}catch(_){}
+  previewGesture.pointers.set(e.pointerId,previewPoint(e));
+
+  const pts=[...previewGesture.pointers.values()];
+  if(pts.length===1){
+    previewGesture.lastCenter=pts[0];
+    previewGesture.lastDistance=null;
+  }else if(pts.length>=2){
+    const a=pts[0], b=pts[1];
+    previewGesture.lastCenter={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    previewGesture.lastDistance=Math.hypot(b.x-a.x,b.y-a.y);
+  }
+},{passive:false});
+
+els.preview.addEventListener("pointermove",e=>{
+  if(!previewGesture.pointers.has(e.pointerId))return;
+  e.preventDefault();
+  previewGesture.pointers.set(e.pointerId,previewPoint(e));
+
+  const pts=[...previewGesture.pointers.values()];
+  if(pts.length===1){
+    const p=pts[0];
+    const last=previewGesture.lastCenter;
+    if(last){
+      // Convert CSS-pixel drag into output-image coordinates.
+      const rect=els.preview.getBoundingClientRect();
+      const sx=W/rect.width, sy=H/rect.height;
+      photoX+=(p.x-last.x)*sx;
+      photoY+=(p.y-last.y)*sy;
+      rerenderGesture();
+    }
+    previewGesture.lastCenter=p;
+    previewGesture.lastDistance=null;
+  }else if(pts.length>=2){
+    const a=pts[0], b=pts[1];
+    const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    const dist=Math.max(1,Math.hypot(b.x-a.x,b.y-a.y));
+
+    if(previewGesture.lastCenter && previewGesture.lastDistance){
+      const rect=els.preview.getBoundingClientRect();
+      const sx=W/rect.width, sy=H/rect.height;
+
+      // Pan with the midpoint.
+      photoX+=(center.x-previewGesture.lastCenter.x)*sx;
+      photoY+=(center.y-previewGesture.lastCenter.y)*sy;
+
+      // Pinch zoom around current placement.
+      const ratio=dist/previewGesture.lastDistance;
+      photoScale=Math.max(0.1,Math.min(5,photoScale*ratio));
+      rerenderGesture();
+    }
+
+    previewGesture.lastCenter=center;
+    previewGesture.lastDistance=dist;
+  }
+},{passive:false});
+
+function endPreviewPointer(e){
+  previewGesture.pointers.delete(e.pointerId);
+  const pts=[...previewGesture.pointers.values()];
+  previewGesture.lastDistance=null;
+  previewGesture.lastCenter=pts.length ? pts[0] : null;
+}
+els.preview.addEventListener("pointerup",endPreviewPointer,{passive:false});
+els.preview.addEventListener("pointercancel",endPreviewPointer,{passive:false});
+
 </script>
 </body>
 </html>
