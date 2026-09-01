@@ -142,6 +142,258 @@ button{
   }
 }
 
+
+#lineColor{font:inherit;padding:3px 8px}
+#previewActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  width:min(100%,1080px);
+  margin:12px auto 22px;
+  padding:0 10px;
+  box-sizing:border-box;
+}
+#previewActions button{font:inherit}
+@media (max-width:700px){
+  #previewActions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:10px;
+  }
+  #previewActions button{
+    width:100%;
+    min-width:0;
+    padding:12px 8px;
+  }
+}
+
+
+/* v27: roomier controls below preview */
+#previewActions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  width:min(100%,1080px);
+  margin:28px auto 42px;
+  padding:8px 22px;
+  box-sizing:border-box;
+}
+#previewActions button{
+  font:inherit;
+  padding:13px 20px;
+  min-height:52px;
+}
+@media (max-width:700px){
+  #previewActions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin:20px auto 34px;
+    padding:8px 18px;
+  }
+  #previewActions button{
+    width:100%;
+    min-width:0;
+    min-height:54px;
+    padding:12px 8px;
+  }
+}
+
+
+/* v28: UI typography separation
+   Comic-style font is reserved for the Logo Machine title / generated artwork.
+   Controls and interface copy use a neutral sans-serif. */
+body,
+label,
+select,
+input,
+button,
+#previewActions button,
+#status,
+#mediaInfo,
+small {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-style: normal;
+}
+
+#site-title {
+  font-family: "Comic Sans MS","Comic Relief","Comic Sans",cursive !important;
+  font-weight: 700;
+}
+
+
+/* v29: only button text is neutral sans-serif */
+body,
+label,
+select,
+input,
+#status,
+#mediaInfo,
+small {
+  font-family: "Comic Sans MS","Comic Relief","Comic Sans",cursive !important;
+}
+
+button,
+#previewActions button {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-style: normal;
+}
+
+#site-title {
+  font-family: "Comic Sans MS","Comic Relief","Comic Sans",cursive !important;
+  font-weight: 700;
+}
+
+
+/* v30: unified Comic Sans-style typography everywhere */
+html, body, body *,
+button, input, select, textarea, label, small,
+#site-title, #previewActions button, #status, #mediaInfo {
+  font-family: "Comic Sans MS","Comic Relief","Comic Sans",cursive !important;
+}
+
+
+/* v31: keep all four preview actions on one row */
+#previewActions{
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+}
+#previewActions button{
+  width:auto !important;
+  min-width:0;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+@media (max-width:700px){
+  #previewActions{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    gap:6px;
+    padding-left:8px;
+    padding-right:8px;
+  }
+  #previewActions button{
+    width:auto !important;
+    flex:1 1 0;
+    padding:10px 4px;
+    font-size:clamp(12px,3.4vw,16px);
+  }
+}
+
+
+/* v32: unify settings control box heights */
+input[type="file"],
+input[type="number"],
+select,
+button,
+#photoScale {
+  box-sizing:border-box;
+}
+
+/* Text/select/button controls in the settings row */
+input[type="file"],
+input[type="number"],
+select,
+button {
+  height:42px;
+  vertical-align:middle;
+}
+
+input[type="number"],
+select {
+  padding:5px 10px;
+}
+
+input[type="file"] {
+  padding:4px;
+}
+
+/* Keep range visually centered with the same control row */
+input[type="range"] {
+  height:42px;
+  margin-top:0;
+  margin-bottom:0;
+  vertical-align:middle;
+}
+
+
+/* v33: unify typography across settings/control area */
+label, input, select, button, small, #status, #mediaInfo {
+  font-size:18px !important;
+  line-height:1.2;
+}
+input[type="file"]::file-selector-button {
+  font-family:"Comic Sans MS","Comic Relief","Comic Sans",cursive;
+  font-size:18px;
+}
+
+
+/* v34: test 14px typography across settings/control UI */
+label,
+input,
+select,
+button,
+small,
+#status,
+#mediaInfo {
+  font-size:14px !important;
+  line-height:1.2;
+}
+
+input[type="file"]::file-selector-button {
+  font-family:"Comic Sans MS","Comic Relief","Comic Sans",cursive;
+  font-size:14px !important;
+}
+
+
+/* v35: compact 14px controls + lighter unified gray */
+input[type="file"],
+input[type="number"],
+select,
+button {
+  height:34px !important;
+  min-height:34px !important;
+  padding-top:3px !important;
+  padding-bottom:3px !important;
+  background:#f5f5f5 !important;
+}
+
+input[type="number"],
+select {
+  padding-left:8px !important;
+  padding-right:8px !important;
+}
+
+input[type="file"] {
+  padding:2px !important;
+  background:#f5f5f5 !important;
+}
+
+input[type="file"]::file-selector-button {
+  height:28px !important;
+  padding:2px 8px !important;
+  margin-right:6px;
+  background:#f5f5f5 !important;
+}
+
+input[type="range"] {
+  height:34px !important;
+}
+
+/* Keep the large action buttons below the preview comfortable. */
+#previewActions button {
+  height:auto !important;
+  min-height:46px !important;
+  padding:10px 16px !important;
+  background:#f5f5f5 !important;
+}
+
 </style>
 </head>
 <body>
@@ -171,7 +423,14 @@ button{
         <option value="youtube">YouTube / Landscape — 1920 × 1080</option>
       </select>
     </label>
-    <label>Photo Scale:
+    
+<label>Line Color:
+  <select id="lineColor">
+    <option value="white" selected>White</option>
+    <option value="black">Black</option>
+  </select>
+</label>
+<label>Photo Scale:
       <input type="range" id="photoScale" min="1" max="3" step="0.01" value="1">
       <span id="photoScaleLabel">100%</span>
     </label>
@@ -185,10 +444,10 @@ button{
   </div>
 
   <div id="buttons">
-    <button id="play">Make Logo</button>
-    <button id="regenerate">Again!?</button>
-    <button id="exportMP4">Download MP4</button>
-    <button id="exportPNG">Download Pic</button>
+    
+    
+    
+    
   </div>
 
   <div id="timeline">
@@ -202,10 +461,36 @@ button{
 <div id="workspace">
   <div id="previewWrap">
     <canvas id="preview" width="1280" height="720"></canvas>
+<div id="previewActions">
+  <button id="play">Make Logo</button>
+  <button id="regenerate">Again!?</button>
+  <button id="exportMP4">Download MP4</button>
+  <button id="exportPNG">Download Pic</button>
+</div>
+
   </div>
 </div>
 
 <script type="module">
+
+let kexFilenameFallbackCounter = 0;
+
+function nextKexFilename(ext){
+  const key = "kexLogoMachineDownloadCounter";
+  let n;
+
+  try{
+    const current = parseInt(localStorage.getItem(key) || "0", 10);
+    n = (Number.isFinite(current) ? current : 0) + 1;
+    localStorage.setItem(key, String(n));
+  }catch(_){
+    kexFilenameFallbackCounter += 1;
+    n = kexFilenameFallbackCounter;
+  }
+
+  return `kexlogomachine${String(n).padStart(2,"0")}.${ext}`;
+}
+
 import {
   Muxer,
   ArrayBufferTarget
@@ -597,7 +882,7 @@ function renderFrame(time,targetCtx){
   const p=buildPath();
 
   targetCtx.save();
-  targetCtx.strokeStyle="#ffffff";
+  targetCtx.strokeStyle=(els.lineColor ? els.lineColor.value : "white");
   targetCtx.globalAlpha=1;
   targetCtx.lineWidth=getLineWidth();
   targetCtx.lineCap="round";
@@ -1001,66 +1286,91 @@ async function exportMP4(){
     const frameUs=Math.round(1_000_000/fps);
 
     async function findSupportedConfig(requestW,requestH){
-      // H.264 encoders are often happier with dimensions divisible by 2.
-      let tryW=requestW-(requestW%2);
-      let tryH=requestH-(requestH%2);
+      // MP4/H.264 is intentionally capped for browser compatibility.
+      // PNG can still remain at the full original resolution.
+      const originalAspect=requestW/requestH;
 
-      // Try the requested size first, then progressively smaller sizes.
-      const scales=[1,0.85,0.7,0.5,0.35];
+      function fitToMaxSide(maxSide){
+        let w=requestW;
+        let h=requestH;
+
+        if(Math.max(w,h)>maxSide){
+          const s=maxSide/Math.max(w,h);
+          w=Math.round(w*s);
+          h=Math.round(h*s);
+        }
+
+        // H.264 requires even dimensions on many devices.
+        w=Math.max(320,w-(w%2));
+        h=Math.max(240,h-(h%2));
+
+        return {w,h};
+      }
+
+      // Start at a safe Full-HD-class size, then fall back further.
+      // This makes large phone photos such as 4928×6560 export reliably.
+      const maxSides=[1920,1600,1440,1280,1080,720];
+
       const codecs=[
         "avc1.640028", // High
         "avc1.4D4028", // Main
         "avc1.42E01E"  // Baseline
       ];
 
-      for(const scale of scales){
-        let w=Math.max(320,Math.round(tryW*scale));
-        let h=Math.max(240,Math.round(tryH*scale));
-        w-=w%2;
-        h-=h%2;
+      for(const maxSide of maxSides){
+        const {w,h}=fitToMaxSide(maxSide);
 
-        // Avoid pathological phone-photo sizes for browser H.264.
-        const maxSide=Math.max(w,h);
-        if(maxSide>2560){
-          const s=2560/maxSide;
-          w=Math.max(320,Math.round(w*s));
-          h=Math.max(240,Math.round(h*s));
-          w-=w%2;
-          h-=h%2;
-        }
+        // Scale bitrate with pixel count instead of forcing 12 Mbps everywhere.
+        const pixels=w*h;
+        const bitrate=Math.max(
+          2_500_000,
+          Math.min(10_000_000,Math.round(pixels*5))
+        );
 
         for(const codec of codecs){
-          const candidate={
-            codec,
-            width:w,
-            height:h,
-            bitrate:12_000_000,
-            framerate:fps,
-            avc:{format:"avc"},
-            latencyMode:"quality"
-          };
-
-          try{
-            const support=await VideoEncoder.isConfigSupported(candidate);
-            if(support.supported){
-              return {
-                config:support.config,
-                width:w,
-                height:h
-              };
+          const variants=[
+            {
+              codec,
+              width:w,
+              height:h,
+              bitrate,
+              framerate:fps,
+              avc:{format:"avc"}
+            },
+            {
+              codec,
+              width:w,
+              height:h,
+              bitrate,
+              framerate:fps,
+              avc:{format:"avc"},
+              hardwareAcceleration:"prefer-hardware"
             }
-          }catch(_){}
+          ];
+
+          for(const candidate of variants){
+            try{
+              const support=await VideoEncoder.isConfigSupported(candidate);
+
+              if(support.supported){
+                return {
+                  config:support.config,
+                  width:w,
+                  height:h
+                };
+              }
+            }catch(_){}
+          }
         }
       }
 
       return null;
     }
-
     const supported=await findSupportedConfig(W,H);
 
     if(!supported){
       throw new Error(
-        "H.264 encoder is unavailable for this browser/device. Try Chrome or Edge, or choose an SNS output preset."
+        "MP4を書き出せませんでした。この端末のH.264エンコーダが利用できません。Chrome / Edge最新版で試してください。"
       );
     }
 
@@ -1155,7 +1465,7 @@ async function exportMP4(){
       throw new Error("Encoded MP4 data is unexpectedly small.");
     }
 
-    const filename=`photo-scribble-${outW}x${outH}.mp4`;
+    const filename=nextKexFilename("mp4");
     const saved=await saveOrShareBlob(blob,filename,"video/mp4");
 
     if(!saved && isLineBrowser){
@@ -1203,7 +1513,7 @@ async function exportFinalPNG(){
   const blob=await new Promise(r=>off.toBlob(r,"image/png"));
   const saved=await saveOrShareBlob(
     blob,
-    "photo-scribble-final.png",
+    nextKexFilename("png"),
     "image/png"
   );
 
@@ -1438,6 +1748,13 @@ els.preview.addEventListener("wheel",e=>{
   setPhotoScaleValue(getPhotoScaleValue()*factor);
   rerenderFromGesture();
 },{passive:false});
+
+
+if(els.lineColor){
+  els.lineColor.addEventListener("change",()=>{
+    if(mediaType) renderPreviewAt(Number(els.scrubber.value)||0);
+  });
+}
 
 </script>
 </body>
