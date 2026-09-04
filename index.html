@@ -575,6 +575,45 @@ input[type="range"] {
   }
 </style>
 
+
+<style id="v53-mobile-preview-buttons">
+  @media (max-width: 700px) {
+    #previewWrap {
+      width: calc(100% - 24px) !important;
+      max-width: none !important;
+      margin-left: 12px !important;
+      margin-right: 12px !important;
+    }
+
+    #previewWrap canvas,
+    #preview {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    #previewActions {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      width: calc(100% - 24px) !important;
+      margin: 18px 12px 0 !important;
+    }
+
+    #previewActions button {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 54px !important;
+      padding: 8px 6px !important;
+      font-size: 15px !important;
+      line-height: 1.1 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 <h1 id="site-title">KYOTO EXPERIMENT Logo Machine</h1>
@@ -1048,6 +1087,15 @@ function buildPath(){
   return p;
 }
 
+
+
+function getLogoTextColor(){
+  const v = els.lineColor ? String(els.lineColor.value).toLowerCase() : "white";
+  return v === "black" ? "#000000" : "#ffffff";
+}
+
+function getSelectedLineColor(){ return getLogoTextColor(); }
+
 function renderFrame(time,targetCtx){
   targetCtx.clearRect(0,0,W,H);
 
@@ -1082,7 +1130,7 @@ function renderFrame(time,targetCtx){
     targetCtx.save();
     targetCtx.translate(textSpec.x,textSpec.y);
     targetCtx.rotate(textSpec.rotation);
-    targetCtx.fillStyle="#ffffff";
+    targetCtx.fillStyle=getLogoTextColor();
     targetCtx.globalAlpha=1;
     targetCtx.font=`700 ${textSpec.size}px "Comic Sans MS","Comic Relief","Comic Sans",cursive`;
     targetCtx.textAlign="center";
