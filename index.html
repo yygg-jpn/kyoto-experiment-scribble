@@ -470,6 +470,68 @@ input[type="range"] {
   }
 </style>
 
+
+<style id="v46-preview-cleanup">
+  /* Entire app background stays pure white */
+  html, body, #workspace {
+    background: #fff !important;
+  }
+
+  /* Photo/video preview box: square corners, no outline */
+  #previewWrap {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+  }
+
+  /* Empty preview gray reduced to about half the previous contrast */
+  #preview {
+    background: #fdfdfd !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+</style>
+
+
+<style id="v47-buttons-restore">
+  /* Keep action buttons visible below the preview canvas */
+  #previewWrap {
+    overflow: visible !important;
+  }
+
+  #previewActions {
+    position: relative;
+    z-index: 2;
+  }
+</style>
+
+
+<style id="v50-preview-size">
+  #previewWrap {
+    width: 60% !important;
+    height: auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #previewWrap canvas,
+  #preview {
+    width: 100% !important;
+    height: auto !important;
+    display: block;
+  }
+
+  /* Keep the action buttons laid out below the smaller preview. */
+  #previewActions {
+    width: 60% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+</style>
+
 </head>
 <body>
 <h1 id="site-title">KYOTO EXPERIMENT Logo Machine</h1>
@@ -949,7 +1011,7 @@ function renderFrame(time,targetCtx){
   if(mediaType==="image" || mediaType==="video"){
     drawMediaCover(targetCtx);
   }else{
-    targetCtx.fillStyle="#333";
+    targetCtx.fillStyle="#b8b8b8";
     targetCtx.fillRect(0,0,W,H);
   }
 
