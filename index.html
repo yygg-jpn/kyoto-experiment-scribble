@@ -532,6 +532,49 @@ input[type="range"] {
   }
 </style>
 
+
+<style id="v51-mobile-buttons-fix">
+  #previewActions {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 28px auto 0 !important;
+    flex-wrap: nowrap !important;
+  }
+
+  #previewActions button {
+    width: auto !important;
+    min-width: 118px !important;
+    white-space: nowrap !important;
+    flex: 0 0 auto !important;
+  }
+
+  @media (max-width: 700px) {
+    #previewActions {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      width: calc(100% - 32px) !important;
+      margin: 20px 16px 0 !important;
+    }
+
+    #previewActions button {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      padding: 10px 8px !important;
+      font-size: 16px !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 <h1 id="site-title">KYOTO EXPERIMENT Logo Machine</h1>
@@ -635,7 +678,7 @@ import {
 
 const $=id=>document.getElementById(id);
 const els={
-  photoInput:$("photoInput"),outputPreset:$("outputPreset"),photoScale:$("photoScale"),photoScaleLabel:$("photoScaleLabel"),photoX:$("photoX"),photoY:$("photoY"),resetPhoto:$("resetPhoto"),
+  photoInput:$("photoInput"),outputPreset:$("outputPreset"),lineColor:$("lineColor"),photoScale:$("photoScale"),photoScaleLabel:$("photoScaleLabel"),photoX:$("photoX"),photoY:$("photoY"),resetPhoto:$("resetPhoto"),
   regenerate:$("regenerate"),
   play:$("play"),
   exportMP4:$("exportMP4"),
