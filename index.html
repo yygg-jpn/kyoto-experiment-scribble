@@ -395,6 +395,81 @@ input[type="range"] {
 }
 
 </style>
+
+<style id="v45-ui-cleanup">
+  html, body {
+    background: #fff !important;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  /* Normalize controls */
+  button,
+  input[type="number"],
+  input[type="text"],
+  select,
+  input[type="file"] {
+    border: 1px solid #b8b8b8 !important;
+    box-shadow: none !important;
+    outline: none;
+    background: #fff !important;
+    border-radius: 0 !important;
+    box-sizing: border-box;
+  }
+
+  button {
+    min-height: 36px;
+    padding: 7px 16px;
+  }
+
+  input[type="number"],
+  input[type="text"],
+  select {
+    min-height: 34px;
+  }
+
+  /* Thin and visually consistent horizontal rules / panel borders */
+  hr,
+  .divider,
+  .separator {
+    border: 0 !important;
+    border-top: 1px solid #c8c8c8 !important;
+  }
+
+  /* Preview/workspace: much lighter before media is loaded */
+  #workspace,
+  #preview,
+  .workspace,
+  .preview,
+  .canvas-wrap,
+  .stage,
+  .preview-box {
+    background: #f7f7f7 !important;
+    border-width: 1px !important;
+    border-color: #b8b8b8 !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep actual canvas white so exported/composited visuals are unaffected */
+  canvas {
+    box-shadow: none !important;
+  }
+
+  /* Bottom action buttons use exactly the same border treatment */
+  #makeLogoBtn,
+  #againBtn,
+  #downloadMp4Btn,
+  #downloadPicBtn,
+  .action-btn,
+  .download-btn {
+    border: 1px solid #9f9f9f !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+</style>
+
 </head>
 <body>
 <h1 id="site-title">KYOTO EXPERIMENT Logo Machine</h1>
